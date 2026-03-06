@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize sorting_tags %}
+
+{% block content %}
+<!-- 
+  전체 페이지 컨테이너
+  - h-screen: 뷰포트 높이만큼 꽉 채움
+  - flex flex-col: 자식 요소들을 수직(상/하)으로 정렬
+-->
+<div class="flex flex-col h-screen p-4 sm:p-6" x-data="{ activeTab: 'dashboard' }">
+
+    <!-- =============================================================== -->
+    <!-- 상단 섹션 (flex-1을 사용해 남는 공간을 모두 차지)              -->
+    <!-- - flex-col lg:flex-row: 모바일에서는 수직, 데스크탑에서는 수평   -->
+    <!-- =============================================================== -->
+    <!-- 탭 메뉴 네비게이션 -->
+    <nav class="border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <!-- 활성화된 탭 -->
+            <a href="#" 
+               @click.prevent="activeTab = 'dashboard'"
+               :class="activeTab === 'dashboard' ? 'text-white border-white' : 'text-gray-400 border-transparent hover:text-white hover:border-gray-500'" 
+               class="flex items-center py-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                <!-- Heroicon: squares-2x2 -->
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm5 0a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm5 0a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                Dashboard
+            </a>
+            <!-- 비활성화된 탭 -->
+            <a href="#" 
+               @click.prevent="activeTab = 'financials'"
+               :class="activeTab === 'financials' ? 'text-white border-white' : 'text-gray-400 border-transparent hover:text-white hover:border-gray-500'"
+               class="flex items-center py-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                <!-- Heroicon: chart-bar -->
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" /><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" /></svg>
+                Financials
+            </a>
+            <a href="#" 
+               @click.prevent="activeTab = 'kpis'" 
+               :class="activeTab === 'kpis' ? 'text-white border-white' : 'text-gray-400 border-transparent hover:text-white hover:border-gray-500'"
+               class="flex items-center py-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                <!-- Heroicon: key -->
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
+                KPIs
+            </a>
+            <a href="#" 
+               @click.prevent="activeTab = 'ratios'" 
+               :class="activeTab === 'ratios' ? 'text-white border-white' : 'text-gray-400 border-transparent hover:text-white hover:border-gray-500'"
+               class="flex items-center py-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                <!-- Heroicon: chart-pie -->
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" /><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" /></svg>
+                Ratios
+            </a>
+            <a href="#" 
+               @click.prevent="activeTab = 'transcripts'" 
+               :class="activeTab === 'transcripts' ? 'text-white border-white' : 'text-gray-400 border-transparent hover:text-white hover:border-gray-500'"
+               class="flex items-center py-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                <!-- Heroicon: document-text -->
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 11-2 0V4H6a1 1 0 11-2 0V4zm4 4a1 1 0 011 1v6a1 1 0 11-2 0V9a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                Transcripts
+            </a>
+        </div>
+    </nav>
+
+    <div x-show="activeTab === 'dashboard'">
+        <!-- 종목명 및 가격 정보 (수정된 코드) -->
+        <div class="pt-6 mb-4">
+            <h1 class="text-3xl sm:text-4xl font-bold text-white">{{ stock.short_name }} 
+                <span class="text-lg text-gray-400">{{ stock.code }}</span>
+            </h1>
+
+            <!-- 
+            - flex: Flexbox 컨테이너로 만듭니다.
+            - justify-between: 자식 요소들을 양쪽 끝으로 보냅니다.
+            - items-center: 자식 요소들을 수직 중앙 정렬합니다.
+            -->
+            <div class="flex justify-between items-center mt-2 w-full lg:w-3/5">
+
+                <!-- 왼쪽: 가격 정보 -->
+                <p class="text-2xl sm:text-3xl font-semibold {% if stock.change_percent > 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                    ${{ stock.current_price|floatformat:2 }}
+                    <span class="text-base ml-2">{{ stock.change_percent|floatformat:2 }}%</span>
+                </p>
+
+                <!-- 오른쪽: 차트 기간 버튼 (Alpine.js로 상태 관리 추가) -->
+                <!-- 이 컴포넌트의 상태를 관리할 x-data를 추가합니다. (또는 상위 요소에 이미 있다면 생략) -->
+                <div x-data="{ chartPeriod: '1Y' }" class="flex items-center space-x-2 p-1 bg-gray-800 rounded-lg">
+                    <button onclick="updatePriceChart('5D')" @click="chartPeriod = '5D'" :class="chartPeriod === '5D' ? 'bg-gray-600 text-white' : 'text-gray-400'" class="text-sm font-semibold py-1 px-3 rounded-md transition-colors">5D</button>
+                    <button onclick="updatePriceChart('1M')" @click="chartPeriod = '1M'" :class="chartPeriod === '1M' ? 'bg-gray-600 text-white' : 'text-gray-400'" class="text-sm font-semibold py-1 px-3 rounded-md transition-colors">1M</button>
+                    <button onclick="updatePriceChart('1Y')" @click="chartPeriod = '1Y'" :class="chartPeriod === '1Y' ? 'bg-gray-600 text-white' : 'text-gray-400'" class="text-sm font-semibold py-1 px-3 rounded-md transition-colors">1Y</button>
+                    <button onclick="updatePriceChart('10Y')" @click="chartPeriod = '10Y'" :class="chartPeriod === '10Y' ? 'bg-gray-600 text-white' : 'text-gray-400'" class="text-sm font-semibold py-1 px-3 rounded-md transition-colors">10Y</button>
+                    <button onclick="updatePriceChart('Max')" @click="chartPeriod = 'Max'" :class="chartPeriod === 'Max' ? 'bg-gray-600 text-white' : 'text-gray-400'" class="text-sm font-semibold py-1 px-3 rounded-md transition-colors">Max</button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden">
+
+            <!-- ----------------------------------------------------------- -->
+            <!-- 상단-왼쪽 (차트)                                          -->
+            <!-- - lg:w-3/5: 데스크탑에서 너비 60% 차지                     -->
+            <!-- - flex flex-col: 내부 요소(헤더, 차트)를 수직으로 배열    -->
+            <!-- ----------------------------------------------------------- -->
+            <div class="w-full lg:w-3/5 flex flex-col">
+                <!-- 메인 가격 차트 컨테이너 (남는 공간을 모두 채움) -->
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 flex-1 relative">
+                    <canvas id="priceChart" class="absolute top-0 left-0 w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <!-- ----------------------------------------------------------- -->
+            <!-- 상단-오른쪽 (프로필, 키 스탯)                               -->
+            <!-- - lg:w-2/5: 데스크탑에서 너비 40% 차지                     -->
+            <!-- - flex flex-col gap-6: 내부 카드들을 수직으로 배열하고 간격 줌 -->
+            <!-- ----------------------------------------------------------- -->
+            <div class="w-full lg:w-2/5 flex flex-col gap-6 overflow-y-auto" >
+                <!-- 프로필 카드 -->
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mover-list" style="height: 50%; flex-grow: 1; overflow-y: auto;">
+                    <h3 class="text-xl font-bold text-white mb-3">Profile</h3>
+                    <p class="text-sm text-gray-300 leading-relaxed">
+                        {{stock.long_business_summary}}
+                    </p>
+                </div>
+
+                <!-- 키 스탯 카드: flex와 flex-col을 추가하여 내부 요소(제목, 내용)를 수직으로 배치 -->
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 flex flex-col h-full">
+                    <h3 class="text-xl font-bold text-white mb-10 flex-shrink-0">Key Stats</h3>
+                    
+                    <!-- 내용 영역: flex-1을 주어 남는 모든 수직 공간을 채우게 함 -->
+                    <div class="flex flex-1">
+                    
+                        <!-- 왼쪽 컬럼 -->
+                        <!-- pr-6: 오른쪽 패딩으로 세로줄과의 간격 생성 -->
+                        <!-- flex flex-col justify-between: 내부 스탯들을 수직으로 배치하고 위아래로 쫙 펼침 -->
+                        <div class="w-1/2 flex flex-col justify-between pr-6">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">시가총액 (Mkt Cap)</span>
+                                <span class="font-medium text-white">{{ stock.market_cap|humanize_kr_simple }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">PER</span>
+                                <span class="font-medium text-white">{{ stock.trailing_pe|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">PBR</span>
+                                <span class="font-medium text-white">{{ stock.price_to_book|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">PSR (TTM)</span>
+                                <span class="font-medium text-white">{{ stock.price_to_sales|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">EPS (TTM)</span>
+                                <span class="font-medium text-white">{{ stock.trailing_eps|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">배당수익률 (Div. Yield)</span>
+                                <span class="font-medium text-white">{{ stock.dividend_yield|floatformat:2 }} %</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 오른쪽 컬럼 -->
+                        <!-- border-l: 왼쪽에 세로줄 생성 -->
+                        <!-- pl-6: 왼쪽 패딩으로 세로줄과의 간격 생성 -->
+                        <div class="w-1/2 flex flex-col justify-between pl-6 border-l border-gray-600">
+                            <!-- 여기에 다른 스탯들을 넣으면 됩니다. (예시) -->
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">52주 최고가</span>
+                                <span class="font-medium text-white">${{ stock.fifty_two_week_high|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">52주 최저가</span>
+                                <span class="font-medium text-white">${{ stock.fifty_two_week_low|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">52주 평균</span>
+                                <span class="font-medium text-white">${{ stock.fifty_day_average|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">200일 평균</span>
+                                <span class="font-medium text-white">${{ stock.two_hundred_day_average|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">거래량 (Volume)</span>
+                                <span class="font-medium text-white">{{ stock.volume|intcomma }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">상장주식수</span>
+                                <span class="font-medium text-white">{{ stock.shares_outstanding|intcomma }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- =============================================================== -->
+        <!-- 하단 섹션 (재무 차트)                                           -->
+        <!-- - mt-6: 상단 섹션과의 간격                                      -->
+        <!-- =============================================================== -->
+        <!-- 하단 섹션 (재무 차트) -->
+        <div class="mt-6" x-data="{ period: 'quarterly' }">
+            <div class="flex  items-center mb-4">
+                <h2 class="text-2xl font-bold text-white">Company Metrics</h2>
+                <!-- Annual / Quarterly 토글 버튼 -->
+                <div class="ml-5 bg-gray-800 p-1 rounded-lg flex">
+                    <button @click="period = 'quarterly'" :class="period === 'quarterly' ? 'bg-gray-600' : ''" class="text-white text-sm font-semibold py-1 px-3 rounded-md transition-colors">Quarterly</button>
+                    <button @click="period = 'annual'" :class="period === 'annual' ? 'bg-gray-600' : ''" class="text-white text-sm font-semibold py-1 px-3 rounded-md transition-colors">Annual</button>
+                </div>
+            </div>
+            
+            <!-- 재무 차트 그리드 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 1. Income Overview 차트 -->
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 h-80">
+                    <canvas x-show="period === 'annual'" id="incomeOverviewAnnualChart"></canvas>
+                    <canvas x-show="period === 'quarterly'" id="incomeOverviewQuarterlyChart"></canvas>
+                </div>
+                
+                <!-- 2. Net Income 차트 -->
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 h-80">
+                    <canvas x-show="period === 'annual'" id="netIncomeAnnualChart"></canvas>
+                    <canvas x-show="period === 'quarterly'" id="netIncomeQuarterlyChart"></canvas>
+                </div>
+
+                <!-- 3. Free Cash Flow 차트 -->
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 h-80">
+                    <canvas x-show="period === 'annual'" id="fcfAnnualChart"></canvas>
+                    <canvas x-show="period === 'quarterly'" id="fcfQuarterlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- x-show만 사용 (별도의 x-data 불필요) -->
+    <div x-show="activeTab === 'financials'" style="display: none;" class="flex flex-col h-full mt-6">
+        <div class="flex justify-between items-center mb-4 flex-shrink-0">
+            <div class="flex items-center space-x-2 border-b border-gray-700">
+                <!-- activeFinStatement 상태를 직접 변경합니다. -->
+                <button @click="activeFinStatement = 'IS'" :class="{'text-white border-blue-500': activeFinStatement === 'IS'}" class="py-2 px-1 border-b-2 font-medium">Income Statement</button>
+                <button @click="activeFinStatement = 'BS'" :class="{'text-white border-blue-500': activeFinStatement === 'BS'}" class="py-2 px-1 border-b-2 font-medium">Balance Sheet</button>
+                <button @click="activeFinStatement = 'CF'" :class="{'text-white border-blue-500': activeFinStatement === 'CF'}" class="py-2 px-1 border-b-2 font-medium">Cash Flow</button>
+            </div>
+            <div class="bg-gray-800 p-1 rounded-lg flex">
+                <!-- financialsPeriod 상태를 직접 변경합니다. -->
+                <button @click="financialsPeriod = 'quarterly'" :class="{'bg-gray-600': financialsPeriod === 'quarterly'}" class="text-white text-sm font-semibold py-1 px-3 rounded-md transition-colors">Quarterly</button>
+                <button @click="financialsPeriod = 'annual'" :class="{'bg-gray-600': financialsPeriod === 'annual'}" class="text-white text-sm font-semibold py-1 px-3 rounded-md transition-colors">Annual</button>
+            </div>
+        </div>
+
+        <!-- 동적 테이블 -->
+        <div class="overflow-x-auto flex-1">
+            <table class="w-full text-sm text-left text-gray-400">
+                <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 sticky left-0 bg-gray-700 z-10">항목</th>
+                        <!-- activeFinancials.dates를 사용하여 현재 선택된 데이터의 날짜를 표시 -->
+                        <template x-for="date in activeFinancials.dates" :key="date">
+                            <th scope="col" class="px-6 py-3 text-right" x-text="date"></th>
+                        </template>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- activeFinancials.items를 사용하여 현재 선택된 데이터의 항목을 순회 -->
+                    <template x-for="item in activeFinancials.items" :key="item.standard">
+                        <tr class="bg-gray-800 border-b border-gray-700">
+                            <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap sticky left-0 bg-gray-800 z-10" x-text="item.label"></th>
+                            
+                            <!-- activeFinancials.statements에서 현재 날짜와 항목에 해당하는 값을 가져옵니다. -->
+                            <template x-for="date in activeFinancials.dates" :key="date">
+                                <td class="px-6 py-4 text-right" x-text="formatNumber(activeFinancials.statements[item.standard]?.[date])"></td>
+                            </template>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{{ price_labels_json|json_script:"price-labels-json" }}
+{{ price_values_json|json_script:"price-values-json" }}
+{{ stock.change_percent|json_script:"change-percent" }}
+
+{{ income_overview_annual_data|json_script:"income-overview-annual-data" }}
+{{ income_overview_quarterly_data|json_script:"income-overview-quarterly-data" }}
+{{ net_income_annual_data|json_script:"net-income-annual-data" }}
+{{ net_income_quarterly_data|json_script:"net-income-quarterly-data" }}
+{{ fcf_annual_data|json_script:"fcf-annual-data" }}
+{{ fcf_quarterly_data|json_script:"fcf-quarterly-data" }}
+{{ financial_data_json|json_script:"financial-data" }}
+{{ initial_data_json|json_script:"financial-data" }}
+
+initial_data_json
+{% endblock %}
+
+<!-- Chart.js 라이브러리 로드 -->
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="{% static 'js/stockDetail.js' %}"></script>
+
+{% endblock %}

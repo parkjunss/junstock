@@ -1,0 +1,467 @@
+/* static/css/styles.css */
+
+* {
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        "Apple Color Emoji",
+        "Segoe UI Emoji",
+        "Segoe UI Symbol",
+        sans-serif;
+}
+
+body {
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        "Apple Color Emoji",
+        "Segoe UI Emoji",
+        "Segoe UI Symbol",
+        sans-serif;
+        margin: 0;
+        padding-left: 80px; /* 사이드바 너비만큼 왼쪽 여백 */
+}
+
+.main{
+    width:100%;
+}
+
+#container {
+    min-width: 320px;
+    height: 90vh;
+    min-height: 600px;
+}
+
+.highcharts-figure {
+    min-width: 320px;
+    margin: 0;
+}
+
+.highcharts-description {
+    padding: 0 10px;
+}
+
+tspan {
+    fill: inherit;
+}
+
+@media screen and (max-width: 600px) {
+    #container {
+        height: 400px;
+    }
+}
+
+
+/* ----- 기본 & 폰트 설정 ----- */
+body {
+    background-color: #000000; /* 아주 어두운 회색 (주 배경) */
+    color: #E0E0E0; /* 밝은 회색 (기본 텍스트) */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    overflow: hidden; /* 스크롤바는 메인 콘텐츠 영역에만 */
+}
+
+.nav {
+    background-color: #0D0B0B;
+}
+
+.header{
+    background-color: #0D0B0B;
+}
+
+.card-bg {
+    background-color: #1E1E1E;
+}
+
+/* ----- 유틸리티 클래스 ----- */
+.text-green { color: #4CAF50; } /* 상승 */
+.text-red { color: #F44336; }   /* 하락 */
+
+.bg-green-light { background-color: rgba(76, 175, 80, 0.2); }
+.bg-red-light { background-color: rgba(244, 67, 54, 0.2); }
+
+/* ----- 전체 레이아웃 ----- */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* ----- 좌측 내비게이션 바 (LNB) ----- */
+.lnb {
+    width: 80px;
+    background-color: #1F1F1F; /* 카드보다 살짝 어두운 배경 */
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1px solid #333;
+}
+
+.lnb-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.lnb-menu a {
+    color: #9E9E9E; /* 비활성 아이콘 색상 */
+    font-size: 24px;
+    transition: color 0.2s ease-in-out;
+}
+.lnb-menu a:hover, .lnb-menu a.active {
+    color: #FFFFFF; /* 호버 및 활성 아이콘 색상 */
+}
+
+.lnb-divider {
+    width: 50%;
+    border-color: #424242;
+    margin: 24px 0;
+}
+
+.watchlist-item {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: white;
+}
+.watchlist-adobe { background-color: #FF0000; }
+.watchlist-netflix { background-color: #E50914; }
+
+/* ----- 메인 콘텐츠 영역 ----- */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ----- 상단 헤더 ----- */
+.main-header {
+    background-color: #121212;
+    border-bottom: 2px solid #0052FF; /* 파란색 강조선 */
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-bar {
+    position: relative;
+    width: 33%;
+}
+
+.search-bar i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9E9E9E;
+}
+
+.search-bar input {
+    background-color: #2A2A2A;
+    border: 1px solid #424242;
+    border-radius: 9999px;
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    color: #E0E0E0;
+    font-size: 1rem;
+}
+.search-bar input:focus {
+    outline: none;
+    border-color: #0052FF;
+}
+
+.header-actions button {
+    background: none;
+    border: none;
+    color: #9E9E9E;
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 16px;
+    transition: color 0.2s ease-in-out;
+}
+.header-actions button:hover {
+    color: #FFFFFF;
+}
+
+/* ----- 콘텐츠 그리드 ----- */
+.content-grid {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto; /* 스크롤 가능하게 */
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+}
+
+/* ----- 카드 공통 스타일 ----- */
+.card {
+    background-color: #1F1F1F;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+/* ----- 개별 위젯 스타일 ----- */
+.index-card {
+    grid-column: span 3; /* 12컬럼 그리드에서 3칸 차지 */
+}
+.index-card-title {
+    color: #BDBDBD;
+    font-size: 0.9rem;
+}
+.index-card-values {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 8px;
+}
+.index-card .value {
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+.index-card .change {
+    font-weight: 600;
+}
+.index-chart-container {
+    height: 64px;
+    margin-top: 12px;
+}
+
+.fear-greed-card {
+    grid-column: span 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fear-greed-circle {
+    width: 140px;
+    height: 140px;
+    background-color: #424242;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.fear-greed-circle .value {
+    font-size: 3.5rem;
+    font-weight: bold;
+}
+.fear-greed-circle .label {
+    color: #BDBDBD;
+    margin-top: -5px;
+}
+
+
+.heatmap-card {
+    grid-column: span 8;
+}
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 예시로 4xN 그리드 */
+    gap: 6px;
+}
+.heatmap-block {
+    height: 90px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.heatmap-block:hover {
+    opacity: 0.8;
+}
+
+/* 히트맵 색상 (디자인에 나온 색상 샘플) */
+.bg-dark-green { background-color: #004D40; }
+.bg-mid-green { background-color: #388E3C; }
+.bg-light-green { background-color: #C8E6C9; }
+.bg-mid-red { background-color: #D32F2F; }
+.bg-dark-red { background-color: #B71C1C; }
+
+
+.top-mover-card {
+    grid-column: span 4;
+}
+.mover-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.mover-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+.mover-item:hover {
+    background-color: #333333;
+}
+.mover-item .info { display: flex; align-items: center; gap: 12px; }
+.mover-item .logo { width: 32px; height: 32px; border-radius: 50%; }
+.mover-item .ticker { font-weight: bold; }
+.mover-item .price { font-size: 0.9rem; color: #BDBDBD; }
+.mover-item .change-pct {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+.mover-item .change-pct.gain {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #66BB6A;
+}
+.mover-item .change-pct.loss {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #EF5350;
+}
+
+.news-container {
+    height: 65.5rem;
+}
+
+.news-card {
+    grid-column: span 4;
+}
+.news-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    /* 중요: 남은 공간을 모두 채우고, 내용이 넘치면 스크롤 */
+    flex-grow: 1;
+    overflow-y: auto;
+}
+.news-item {
+    padding: 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+.news-item:hover {
+    background-color: #333333;
+}
+.news-item .date {
+    font-size: 0.75rem;
+    color: #9E9E9E;
+}
+.news-item .title {
+    font-weight: 600;
+    margin-top: 4px;
+}
+.news-item .related {
+    font-size: 0.8rem;
+    color: #757575;
+    margin-top: 4px;
+}
+
+
+/* ===== 모던 스크롤바 스타일링 ===== */
+
+/* 스크롤바가 적용될 모든 요소에 이 클래스를 추가해주면 편리합니다. */
+.mover-list,
+.news-list {
+    /* -- Firefox 스크롤바 스타일 -- */
+    scrollbar-width: thin; /* 스크롤바 두께 */
+    scrollbar-color: #555 #1F1F1F; /* (앞) 스크롤바 막대 색상, (뒤) 스크롤바 트랙 색상 */
+}
+
+/* -- Webkit (Chrome, Safari, Edge) 스크롤바 스타일 -- */
+.mover-list::-webkit-scrollbar,
+.news-list::-webkit-scrollbar {
+    width: 8px; /* 스크롤바의 너비 */
+}
+
+.mover-list::-webkit-scrollbar-track,
+.news-list::-webkit-scrollbar-track {
+    background: #1F1F1F; /* 스크롤바 뒷 배경 색상 (카드 배경색과 동일하게) */
+    border-radius: 10px;
+}
+
+.mover-list::-webkit-scrollbar-thumb,
+.news-list::-webkit-scrollbar-thumb {
+    background-color: #555; /* 스크롤바 막대 색상 */
+    border-radius: 10px; /* 스크롤바 막대 모서리 둥글게 */
+    border: 2px solid #1F1F1F; /* 막대 주변에 여백을 주는 효과 (floating scrollbar) */
+}
+
+.mover-list::-webkit-scrollbar-thumb:hover,
+.news-list::-webkit-scrollbar-thumb:hover {
+    background-color: #777; /* 마우스를 올렸을 때의 색상 */
+}
+
+
+.pagination a {
+  border-radius: 5px;
+}
+
+.pagination a.active {
+  border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-left: 0;
+        overflow: auto;
+    }
+
+    .main {
+        padding-top: 60px; /* 상단 고정 nav 높이만큼 */
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .news-container {
+        height: auto; /* 고정 높이 제거 */
+    }
+
+    .header {
+        display: none; /* 모바일에서 검색바 헤더 숨김 */
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-left: 0;
+        overflow-x: hidden;
+    }
+    .main {
+        padding-top: 60px;
+        overflow-x: hidden;
+        width: 100vw;
+    }
+}

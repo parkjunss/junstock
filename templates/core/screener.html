@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load static humanize %}
+
+{% block title %}종목 스크리너{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/screener.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="screener-container">
+    <!-- 페이지 헤더 -->
+    <div class="screener-header">
+        <h1><i class="fas fa-filter h-icon"></i>종목 스크리너</h1>
+        <p>원하는 조건으로 종목을 검색하고 새로운 투자 기회를 찾아보세요.</p>
+    </div>
+
+    <!-- 검색 조건 필터 -->
+    <div class="card filter-card" style="margin-bottom: 10px;">
+        <h5 class="card-title">검색 조건</h5>
+        <form hx-get="{% url 'screener' %}"
+          hx-target="#results-wrapper"  {# 타겟을 결과 카드 전체로 변경 #}
+          hx-swap="outerHTML"          {# 이 카드 자체를 교체 #}
+          hx-push-url="true"
+          hx-trigger="change delay:500ms"
+          hx-indicator="#search-spinner">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div class="search-group">
+                    <label for="search-input" class="form-label">종목명 또는 티커 검색</label>
+                    <input type="text" id="search-input" class="form-control" name="q" placeholder="예: AAPL, Apple, 삼성전자..." value="{{ request.GET.q }}">
+                    <span id="search-spinner" class="htmx-indicator">
+                        <i class="fas fa-spinner fa-spin" style="margin-left: 10px;"></i>
+                    </span>
+                </div>
+                <div>
+                    <label for="market_cap_min" class="form-label">시가총액 (억 원)</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="market_cap_min" placeholder="최소" value="{{ request.GET.market_cap_min }}">
+                        <span class="input-group-text">~</span>
+                        <input type="number" class="form-control" name="market_cap_max" placeholder="최대" value="{{ request.GET.market_cap_max }}">
+                    </div>
+                </div>
+                <div>
+                    <label for="per_min" class="form-label">PER (배)</label>
+                    <div class="input-group">
+                        <input type="number" step="0.1" class="form-control" name="per_min" placeholder="최소" value="{{ request.GET.per_min }}">
+                        <span class="input-group-text">~</span>
+                        <input type="number" step="0.1" class="form-control" name="per_max" placeholder="최대" value="{{ request.GET.per_max }}">
+                    </div>
+                </div>
+                <div>
+                    <label for="pbr_min" class="form-label">PBR (배)</label>
+                    <div class="input-group">
+                        <input type="number" step="0.1" class="form-control" name="pbr_min" placeholder="최소" value="{{ request.GET.pbr_min }}">
+                        <span class="input-group-text">~</span>
+                        <input type="number" step="0.1" class="form-control" name="pbr_max" placeholder="최대" value="{{ request.GET.pbr_max }}">
+                    </div>
+                </div>
+                <div>
+                    <label for="dividend_yield_min" class="form-label">배당수익률 (%)</label>
+                    <div class="input-group">
+                        <input type="number" step="0.1" class="form-control" name="dividend_yield_min" placeholder="최소" value="{{ request.GET.dividend_yield_min }}">
+                        <span class="input-group-text">~</span>
+                        <input type="number" step="0.1" class="form-control" name="dividend_yield_max" placeholder="최대" value="{{ request.GET.dividend_yield_max }}">
+                    </div>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <a href="{% url 'screener' %}" class="btn btn-secondary">초기화</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> 조건 적용
+                </button>
+            </div>
+        </form>
+    </div>
+    <div id="results-wrapper">
+        {% include 'partials/results_card.html' %}
+    </div>
+</div>
+{% endblock %}

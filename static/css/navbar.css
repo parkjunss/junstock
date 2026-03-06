@@ -1,0 +1,213 @@
+/* --- 기존 데스크톱 스타일 (변경 없음) --- */
+/* --- 사이드바 전체 컨테이너 --- */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 80px;
+    background-color: #000;
+    padding: 20px 0;
+    transition: width 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.sidebar-header {
+    padding: 0 28px; /* 좌우 패딩을 a 태그와 맞춤 */
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+
+.sidebar .sidebar-header .sidebar-brand {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .5s ease;
+  font-weight: 900;
+  font-size: 25px;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* 햄버거 아이콘 (데스크톱에서는 숨김) */
+.sidebar-toggler {
+    display: none;
+}
+
+/* 마우스를 올렸을 때 사이드바 확장 */
+.sidebar:hover {
+    width: 250px;
+}
+
+/* --- 메뉴 리스트 --- */
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+/* --- 각 메뉴 아이템 (링크) --- */
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    color: #e0e0e0;
+    text-decoration: none;
+    padding: 18px 28px;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-nav a:hover {
+    background-color: #252525;
+}
+
+.sidebar-nav .nav-icon {
+    font-size: 24px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.sidebar-nav .nav-logo {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.sidebar-nav .nav-text {
+    margin-left: 24px;
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar:hover .nav-text {
+    opacity: 1;
+    transition-delay: 0.1s;
+}
+
+.divider {
+    text-align: center;
+    padding: 15px 0;
+    color: #555;
+}
+
+.add-item a {
+    justify-content: center;
+}
+
+.sidebar:not(:hover) .add-item .nav-text {
+    display: none;
+}
+
+/* ================================================================== */
+/* --- 모바일 반응형 스타일 (화면 너비 768px 이하) --- */
+/* ================================================================== */
+@media (max-width: 768px) {
+    body {
+        padding-left: 0; /* 사이드바로 인한 왼쪽 여백 제거 */
+    }
+    /* 1. 사이드바를 상단 바로 변경 */
+    .sidebar {
+        width: 100%;       /* 너비 100% */
+        height: auto;        /* 높이는 내용에 맞게 자동 조절 */
+        flex-direction: column; /* 아이템들을 세로로 쌓음 */
+        padding: 0;
+        /* hover 효과 제거 */
+        overflow: visible; 
+    }
+    
+    .sidebar:hover {
+        width: 100%; /* hover 시 너비 변경 없앰 */
+    }
+
+    /* 2. 헤더 영역 (로고와 햄버거 아이콘) */
+    .sidebar-header {
+        width: 100%;
+        height: 60px; /* 상단 바 높이 고정 */
+        padding: 0 20px;
+        margin: 0;
+        display: flex;
+        justify-content: space-between; /* 로고는 왼쪽, 토글러는 오른쪽 */
+        align-items: center;
+        background-color: #000; /* 헤더 배경색 보장 */
+        position: relative; /* z-index를 위해 */
+        z-index: 1001;
+    }
+    
+    /* 3. 햄버거 토글러 보이기 */
+    .sidebar-toggler {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 24px;
+        height: 24px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .sidebar-toggler span {
+        width: 100%;
+        height: 2px;
+        background: #fff;
+        border-radius: 10px;
+        transition: all 0.3s linear;
+    }
+
+    /* 햄버거 -> X 모양으로 바꾸는 애니메이션 */
+    .sidebar-toggler.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+    .sidebar-toggler.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .sidebar-toggler.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    /* 4. 메뉴 리스트 (평소에는 숨김) */
+    .sidebar-nav {
+        display: none; /* 평소에는 숨김 */
+        width: 100%;
+        padding: 10px 0;
+        background-color: #111; /* 메뉴 배경색 */
+        flex-grow: 0; /* flex-grow 속성 초기화 */
+    }
+    
+    /* JavaScript로 is-open 클래스가 추가되면 메뉴 보이기 */
+    .sidebar.is-open .sidebar-nav {
+        display: block;
+    }
+    
+    /* 5. 메뉴 아이템과 텍스트 스타일 조정 */
+    .sidebar-nav a {
+        padding: 15px 20px; /* 모바일용 패딩 조정 */
+    }
+
+    .sidebar .nav-text,
+    .sidebar:hover .nav-text {
+        opacity: 1; /* 텍스트 항상 보이게 */
+        transition: none;
+        transition-delay: 0s;
+    }
+
+    .add-item a {
+        justify-content: flex-start; /* 일반 메뉴처럼 왼쪽 정렬 */
+    }
+
+    .sidebar:not(:hover) .add-item .nav-text {
+        display: inline-block; /* 축소 상태 개념이 없으므로 항상 보이게 */
+    }
+}

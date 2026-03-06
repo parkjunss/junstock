@@ -1,0 +1,53 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+*.log
+
+# Virtual environments
+.venv/
+
+# Environment variables
+.env
+
+# Database
+db.sqlite3
+
+# Secrets
+fcm-service-account-key.json
+
+# CSV files
+*.csv
+
+# Temp files
+my/
+staticfiles/
+service_files.txt
+commands.txt
+media/
+node_modules/
+movies/
+mig_all/
+static/ticker_icons/
+static/output.css
+
+# Model training results & weights
+stocks/pytorch_trained_model/sac_ticker_specific_logs/
+*.pth
+*.pkl
+
+# Locks
+uv.lock
+package-lock.json
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+.python-version
+
+# Miscellaneous
+backtest_sac.py

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 주식 시장 리포트</title>
+    <style>
+        /* 이메일 클라이언트 간의 디자인 일관성을 위한 기본 스타일 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        h2, h3, h4 {
+            color: #1a2a3a;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eeeeee;
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .news-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .news-item:last-child {
+            border-bottom: none;
+        }
+        .news-content {
+            vertical-align: top;
+            padding-left: 15px;
+        }
+        .news-title a {
+            font-weight: bold;
+            color: #0056b3;
+            text-decoration: none;
+        }
+        .news-description {
+            font-size: 0.9em;
+            color: #555555;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>안녕하세요, {{ username }}님!</h2>
+        <p>오늘의 주식 시장 요약 및 관심종목 분석 리포트입니다.</p>
+
+        <hr>
+
+        <!-- 1. 종합 시황 분석 (LLM 생성 HTML) -->
+        <!-- |safe 필터는 LLM이 생성한 HTML 태그를 그대로 렌더링하게 함 -->
+        <div>
+            {{ market_summary|safe }}
+        </div>
+        
+        <br>
+
+        <!-- 2. 지수 비교 차트 (인라인 이미지) -->
+        <h3>주요 지수 동향</h3>
+        <img src="cid:{{ indices_chart_cid }}" alt="Indices Comparison Chart">
+
+        <br>
+        
+        <!-- 3. 섹터 히트맵 (인라인 이미지) -->
+        <h3>오늘의 섹터별 동향</h3>
+        <img src="cid:{{ sector_heatmap_cid }}" alt="Sector Performance Heatmap">
+
+        <hr>
+
+        <h2>나의 관심종목 분석</h2>
+
+        <!-- 4. 관심종목 목록 -->
+        <!-- for 루프와 empty 태그를 사용하여 관심종목 유무에 따라 다른 내용 표시 -->
+        {% for item in watchlist_items %}
+            <div class="news-item">
+                <h4>{{ item.stock.name }} ({{ item.stock.code }})</h4>
+                
+                <!-- 4-1. 개별 종목 분석 (LLM 생성 HTML) -->
+                <div>{{ item.analysis|safe }}</div>
+                
+                <!-- 4-2. 관련 뉴스 리스트 (썸네일 포함) -->
+                {% if item.news %}
+                    <h5 style="margin-bottom: 10px; margin-top: 15px;">관련 뉴스</h5>
+                    <table style="width: 100%;">
+                        {% for news_item in item.news %}
+                        <tr>
+                            {% if news_item.thumbnail %}
+                            <td style="width: 80px;">
+                                <img src="{{ news_item.thumbnail }}" alt="news thumbnail" style="width: 70px; height: 70px; object-fit: cover; border-radius: 4px;">
+                            </td>
+                            {% endif %}
+                            <td class="news-content">
+                                <p class="news-title"><a href="{{ news_item.url }}">{{ news_item.title }}</a></p>
+                                <p class="news-description">{{ news_item.description }}</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        {% empty %}
+            <!-- 관심종목이 없을 때 표시될 내용 -->
+            <p>등록된 관심종목이 없습니다.</p>
+            <p>지금 바로 앱에서 관심있는 종목을 추가하고, 매일 개인화된 AI 분석 리포트를 받아보세요!</p>
+        {% endfor %}
+
+        <hr>
+        
+        <p style="text-align: center; font-size: 0.8em; color: #888;">
+            본 이메일은 정보 제공을 목적으로 하며, 투자 권유가 아닙니다.<br>
+            모든 투자의 최종 결정과 책임은 투자자 본인에게 있습니다.<br>
+            &copy; [YYYY] [Your App Name]. All rights reserved.
+        </p>
+    </div>
+</body>
+</html>

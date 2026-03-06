@@ -1,0 +1,43 @@
+{% load static %}
+<nav class="sidebar">
+    <div class="sidebar-header">
+		<a href="/" class="sidebar-brand">
+			<!--Noble<span>UI</span>-->
+			<!--<img width="50px" src="/static/assets/images/white_icon.png">-->
+			<h4 class="text-bold tx-24"></h4>
+		</a>
+		<div class="sidebar-toggler not-active">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+	</div>
+    <ul class="sidebar-nav">
+        <!-- 기본 메뉴 -->
+        <li><a href="{% url 'home' %}"><i class="fas fa-home nav-icon"></i><span class="nav-text">Home</span></a></li>
+        <li><a href="{% url 'screener' %}"><i class="fas fa-filter nav-icon"></i><span class="nav-text">Screener</span></a></li>
+        <li><a href="#"><i class="fas fa-calendar-alt nav-icon"></i><span class="nav-text">Calendar</span></a></li>
+        <li><a href="#"><i class="fas fa-th-large nav-icon"></i><span class="nav-text">Apps</span></a></li>
+        
+        <!-- 구분선 -->
+        <li class="divider"><i class="fas fa-ellipsis-h"></i></li>
+        
+        {% for stock in my_stocks %}
+        <li>
+            <a href="{% url 'stock_detail' stock.code %}">
+                <img src="{% static 'ticker_icons/' %}{{ stock.code }}.png" alt="{{ stock.short_name }}" class="nav-logo">
+                <span class="nav-text">{{ stock.code }}</span>
+            </a>
+        </li>
+        {% empty %}
+
+        {% endfor %}
+
+        <!-- '추가' 버튼 (항상 맨 아래에 위치) -->
+        <li class="add-item">
+            <a href="#">
+                <i class="fas fa-plus nav-icon"></i>
+            </a>
+        </li>
+    </ul>
+</nav>

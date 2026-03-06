@@ -1,0 +1,555 @@
+{% extends "base.html" %}
+{% load static humanize sorting_tags %}
+{% block content %}
+<!-- 
+  페이지 전체를 하나의 Alpine.js 컴포넌트로 만듭니다.
+  x-data 속성으로 stockDetailPage 컴포넌트를 초기화하고, Django에서 전달한 초기 데이터를 주입합니다.
+-->
+<div class="flex flex-col h-screen bg-gray-900 text-gray-300" 
+     x-data="stockDetailPage('{{ stock.code }}', initialData)">
+
+    <!-- ======================= 탭 메뉴 ======================= -->
+    <nav class="p-4 sm:px-6 border-b border-gray-700 flex-shrink-0">
+        <div class="flex items-center space-x-4">
+            <a href="#" @click.prevent="data.activeTab = 'dashboard'" 
+                :class="{'text-white border-white': data.activeTab === 'dashboard', 'text-gray-400 border-transparent hover:text-white hove:border-gray-500': data.activeTab !== 'dashboard'}" 
+                class="flex items-center py-2 px-1 text-sm font-medium border-b-2 transition-colors">
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm5 0a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm5 0a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                Dashboard
+            </a>
+            <a href="#" 
+                @click.prevent="data.activeTab = 'financials'" 
+                :class="{'text-white border-white': data.activeTab === 'financials', 'text-gray-400 border-transparent hover:text-white hover:border-gray-500': data.activeTab !== 'financials'}" 
+                class="flex items-center py-2 px-1 text-sm font-medium border-b-2 transition-colors">
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" /><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" /></svg>
+                Financials
+            </a>
+            <a href="#" 
+                @click.prevent="data.activeTab = 'kpis'" 
+                :class="{'text-white border-white': data.activeTab === 'kpis', 'text-gray-400 border-transparent hover:text-white hover:border-gray-500': data.activeTab !== 'kpis'}" 
+                class="flex items-center py-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                <!-- Heroicon: key -->
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
+                KPIs
+            </a>
+            <a href="#" 
+               @click.prevent="data.activeTab = 'ratios'" 
+               :class="data.activeTab === 'ratios' ? 'text-white border-white' : 'text-gray-400 border-transparent hover:text-white hover:border-gray-500'"
+               class="flex items-center py-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                <!-- Heroicon: chart-pie -->
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" /><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" /></svg>
+                Ratios
+            </a>
+            <a href="#" 
+               @click.prevent="data.activeTab = 'charts'" 
+               :class="data.activeTab === 'charts' ? 'text-white border-white' : 'text-gray-400 border-transparent hover:text-white hover:border-gray-500'"
+               class="flex items-center py-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                <!-- Heroicon: document-text -->
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 11-2 0V4H6a1 1 0 11-2 0V4zm4 4a1 1 0 011 1v6a1 1 0 11-2 0V9a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                CandleCharts
+            </a>
+                <a href="#" @click.prevent="data.activeTab = 'ai_performance'"
+                :class="{'text-white border-white': data.activeTab === 'ai_performance', 'text-gray-400 border-transparent hover:text-white': data.activeTab !== 'ai_performance'}"
+                class="flex items-center py-2 px-1 text-sm font-medium border-b-2 transition-colors">
+                    AI 성과
+            </a>
+        </div>
+    </nav>
+
+    <!-- ======================= 탭 컨텐츠 영역 ======================= -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6">
+
+        <!-- -------------------- Dashboard 탭 컨텐츠 -------------------- -->
+        <div x-show="data.activeTab === 'dashboard'" class="flex flex-col gap-6 h-full">
+            <!-- 1. 종목명/가격/기간선택 -->
+            <div class="flex-shrink-0">
+                <h1 class="text-3xl font-bold text-white">{{ stock.short_name }} <span class="text-lg text-gray-400">{{ stock.code }}</span></h1>
+                <div class="flex justify-between items-center mt-2 lg:w-3/5">
+                    <p class="text-2xl font-semibold {% if stock.change_percent >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                        ${{ stock.current_price|floatformat:2 }} 
+                        <span class="text-base ml-2">{{ stock.change_percent|floatformat:2 }}%</span>
+                    </p>
+                    <div class="flex items-center space-x-1 p-1 bg-gray-800 rounded-lg">
+                        <button @click="updatePriceChart('5d')" :class="{'bg-gray-600 text-white': data.chartPeriod === '5d'}" class="text-xs font-semibold py-1 px-3 rounded-md transition-colors text-gray-300 hover:bg-gray-700">5D</button>
+                        <button @click="updatePriceChart('1m')" :class="{'bg-gray-600 text-white': data.chartPeriod === '1m'}" class="text-xs font-semibold py-1 px-3 rounded-md transition-colors text-gray-300 hover:bg-gray-700">1M</button>
+                        <button @click="updatePriceChart('1y')" :class="{'bg-gray-600 text-white': data.chartPeriod === '1y'}" class="text-xs font-semibold py-1 px-3 rounded-md transition-colors text-gray-300 hover:bg-gray-700">1Y</button>
+                        <button @click="updatePriceChart('10y')" :class="{'bg-gray-600 text-white': data.chartPeriod === '10y'}" class="text-xs font-semibold py-1 px-3 rounded-md transition-colors text-gray-300 hover:bg-gray-700">10Y</button>
+                        <button @click="updatePriceChart('max')" :class="{'bg-gray-600 text-white': data.chartPeriod === 'max'}" class="text-xs font-semibold py-1 px-3 rounded-md transition-colors text-gray-300 hover:bg-gray-700">Max</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 2. 상단 차트/정보 영역 -->
+            <div class="flex flex-col lg:flex-row flex-1 gap-6 min-h-0">
+                <div class="w-full lg:w-3/5 flex flex-col"><div class="card-bg border border-gray-700 rounded-xl p-4 flex-1 relative"><canvas x-ref="priceCanvas"></canvas></div></div>
+                <div class="w-full lg:w-2/5 flex flex-col gap-6 overflow-y-auto">
+                <div class="card-bg border border-gray-700 rounded-xl p-6 mover-list" style="height: 50%; flex-grow: 1; overflow-y: auto; padding:2%">
+                    <h3 class="text-xl font-bold text-white mb-3">Profile</h3>
+                    <dp class="text-sm text-gray-300 leading-relaxed">
+                        {{stock.long_business_summary}}
+                    </p>
+                </div>
+                    <!-- 키 스탯 카드: flex와 flex-col을 추가하여 내부 요소(제목, 내용)를 수직으로 배치 -->
+                    <div class="card-bg  border border-gray-700 rounded-xl p-6 flex flex-col h-full">
+                        <h3 class="text-xl font-bold text-white mb-10 flex-shrink-0">Key Stats</h3>
+                        
+                        <!-- 내용 영역: flex-1을 주어 남는 모든 수직 공간을 채우게 함 -->
+                        <div class="flex flex-1">
+                        
+                            <!-- 왼쪽 컬럼 -->
+                            <!-- pr-6: 오른쪽 패딩으로 세로줄과의 간격 생성 -->
+                            <!-- flex flex-col justify-between: 내부 스탯들을 수직으로 배치하고 위아래로 쫙 펼침 -->
+                            <div class="w-1/2 flex flex-col justify-between pr-6">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">산업 (Industry)</span>
+                                    <span class="font-medium text-white">{{ stock.industry }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">시가총액 (Mkt Cap)</span>
+                                    <span class="font-medium text-white">{{ stock.market_cap|humanize_kr_simple }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">PER</span>
+                                    <span class="font-medium text-white">{{ stock.trailing_pe|floatformat:2 }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">PBR</span>
+                                    <span class="font-medium text-white">{{ stock.price_to_book|floatformat:2 }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">PSR (TTM)</span>
+                                    <span class="font-medium text-white">{{ stock.price_to_sales|floatformat:2 }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">EPS (TTM)</span>
+                                    <span class="font-medium text-white">{{ stock.trailing_eps|floatformat:2 }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">배당수익률 (Div. Yield)</span>
+                                    <span class="font-medium text-white">{{ stock.dividend_yield|floatformat:2 }} %</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 오른쪽 컬럼 -->
+                            <!-- border-l: 왼쪽에 세로줄 생성 -->
+                            <!-- pl-6: 왼쪽 패딩으로 세로줄과의 간격 생성 -->
+                            <div class="w-1/2 flex flex-col justify-between pl-6 border-l border-gray-600">
+                                <!-- 여기에 다른 스탯들을 넣으면 됩니다. (예시) -->
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">Sector</span>
+                                    <span class="font-medium text-white">{{ stock.sector }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">52주 최고가</span>
+                                    <span class="font-medium text-white">${{ stock.fifty_two_week_high|floatformat:2 }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">52주 최저가</span>
+                                    <span class="font-medium text-white">${{ stock.fifty_two_week_low|floatformat:2 }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">52주 평균</span>
+                                    <span class="font-medium text-white">${{ stock.fifty_day_average|floatformat:2 }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">200일 평균</span>
+                                    <span class="font-medium text-white">${{ stock.two_hundred_day_average|floatformat:2 }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">거래량 (Volume)</span>
+                                    <span class="font-medium text-white">{{ stock.volume|intcomma }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">상장주식수</span>
+                                    <span class="font-medium text-white">{{ stock.shares_outstanding|intcomma }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 하단 재무 차트 영역 -->
+            <div class="mt-6 flex-shrink-0">
+                <div class="flex items-center mb-4">
+                    <h2 class="text-2xl font-bold text-white">Company Metrics</h2>
+                    <div class="ml-5 card-bg p-1 rounded-lg flex">
+                        <button @click="data.metricsPeriod = 'quarterly'" :class="{'bg-gray-600 text-white': data.metricsPeriod === 'quarterly'}" class="text-sm font-semibold py-1 px-3 rounded-md transition-colors text-gray-300 hover:bg-gray-700">Quarterly</button>
+                        <button @click="data.metricsPeriod = 'annual'" :class="{'bg-gray-600 text-white': data.metricsPeriod === 'annual'}" class="text-sm font-semibold py-1 px-3 rounded-md transition-colors text-gray-300 hover:bg-gray-700">Annual</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card-bg border border-gray-700 rounded-xl p-4 h-80"><canvas x-ref="incomeOverviewAnnualCanvas" x-show="data.metricsPeriod === 'annual'" style="display: none;"></canvas><canvas x-ref="incomeOverviewQuarterlyCanvas" x-show="data.metricsPeriod === 'quarterly'"></canvas></div>
+                    <div class="card-bg border border-gray-700 rounded-xl p-4 h-80"><canvas x-ref="netIncomeAnnualCanvas" x-show="data.metricsPeriod === 'annual'" style="display: none;"></canvas><canvas x-ref="netIncomeQuarterlyCanvas" x-show="data.metricsPeriod === 'quarterly'"></canvas></div>
+                    <div class="card-bg border border-gray-700 rounded-xl p-4 h-80"><canvas x-ref="fcfAnnualCanvas" x-show="data.metricsPeriod === 'annual'" style="display: none;"></canvas><canvas x-ref="fcfQuarterlyCanvas" x-show="data.metricsPeriod === 'quarterly'"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- -------------------- Financials 탭 컨텐츠 -------------------- -->
+        <div x-show="data.activeTab === 'financials'" style="display: none;" class="flex flex-col h-full mover-list">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <div class="flex items-center space-x-2 border-b border-gray-700">
+                    <button @click="data.activeFinStatement = 'IS'" :class="{'text-white border-blue-500': data.activeFinStatement === 'IS'}" class="py-2 px-1 border-b-2 font-medium">Income Statement</button>
+                    <button @click="data.activeFinStatement = 'BS'" :class="{'text-white border-blue-500': data.activeFinStatement === 'BS'}" class="py-2 px-1 border-b-2 font-medium">Balance Sheet</button>
+                    <button @click="data.activeFinStatement = 'CF'" :class="{'text-white border-blue-500': data.activeFinStatement === 'CF'}" class="py-2 px-1 border-b-2 font-medium">Cash Flow</button>
+                </div>
+                <div class="card-bg p-1 rounded-lg flex">
+                    <button @click="data.financialsPeriod = 'quarterly'" :class="{'bg-gray-600 text-white': data.financialsPeriod === 'quarterly'}" class="text-white text-sm font-semibold py-1 px-3 rounded-md transition-colors">Quarterly</button>
+                    <button @click="data.financialsPeriod = 'annual'" :class="{'bg-gray-600 text-white': data.financialsPeriod === 'annual'}" class="text-white text-sm font-semibold py-1 px-3 rounded-md transition-colors">Annual</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-sm text-left text-gray-400">
+                    <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 sticky left-0 bg-gray-700 z-10">항목</th>
+                            <template x-for="date in activePeriodData.dates" :key="date"><th class="px-6 py-3 text-right" x-text="date"></th></template>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="item in currentStatementData.items" :key="item.standard">
+                            <tr class="card-bg border-b border-gray-700">
+                                <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap sticky left-0 card-bg0 z-10" x-text="item.label"></th>
+                                <template x-for="date in activePeriodData.dates" :key="date">
+                                    <td class="px-6 py-4 text-right" x-text="formatNumber(activePeriodData.statements[item.standard]?.[date])"></td>
+                                </template>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- KPI 탭 컨텐츠 영역 -->
+        <div x-show="data.activeTab === 'kpis'" style="display: none;">
+            <!-- 로딩 중일 때 스피너 표시 -->
+            <template x-if="data.isKpiLoading">
+                <div>Loading KPIs...</div>
+            </template>
+
+            <!-- 로딩이 끝나고 데이터가 있을 때 컨텐츠 표시 -->
+            <template x-if="getKpiData">
+                <div class="grid grid-cols-3 gap-4">
+                    <!-- 수익성 섹션 -->
+                    <div>
+                        <h3 class="font-bold">수익성 (Profitability)</h3>
+                        <!-- x-for를 사용해 kpiData.profitability를 순회하며 표시 -->
+                        <template x-for="([year, growthValues]) in Object.entries(kpiData.growth)">
+                            <div>
+                                <!-- year 변수 (예: '2024') -->
+                                <h4 x-text="year"></h4> 
+                                
+                                <!-- growthValues.revenue_growth_yoy에 접근 -->
+                                <p>매출 성장률: <span x-text="growthValues.revenue_growth_yoy?.toFixed(2) + '%'"></span></p>
+                            </div>
+                        </template>
+                    </div>
+                    <!-- 성장성, 안정성 등 다른 섹션들 -->
+                </div>
+            </template>
+        </div>
+
+        <div x-show="data.activeTab === 'charts'" style="display: none;" class="chart-container">
+            <div class="flex items-center space-x-1 p-1 rounded-lg periods-wrapper">
+                <button class="period-button" data-period="5d">5D</button>
+                <button class="period-button" data-period="1m">1M</button>
+                <button class="period-button" data-period="6m">6M</button>
+                <button class="period-button active" data-period="1y">1Y</button>
+                <button class="period-button" data-period="10y">10Y</button>
+                <button class="period-button" data-period="max">All</button>
+            </div>
+
+            <div class="controls-wrapper">
+                <div class="row">
+                    <button id="toggle-controls">⚙️ Settings</button>
+                    <button id="toggle-backtest">📊 Backtest</button>
+                </div>
+                <div id="controls" class="visible hidden">
+                <fieldset>
+                    <legend>Bollinger Bands</legend>
+                    <div class="control-row">
+                        <input type="checkbox" id="showBBands" > <label for="showBBands">Show</label>
+                    </div>
+                    <div class="control-row">
+                        <label for="bbPeriod">Period:</label> <input type="number" id="bbPeriod" value="20" min="2">
+                    </div>
+                    <div class="control-row">
+                        <label for="bbStdDev">StdDev:</label> <input type="number" id="bbStdDev" value="2" min="1">
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>BBand Bandwidth</legend>
+                    <div class="info-box-container">
+                    <!-- <span class="info-icon" title="BBand Bandwidth: Bollinger Bandwidth quantifies the width of the Bollinger Bands. It is calculated as (Upper Band - Lower Band) / Middle Band. A higher Bandwidth indicates greater volatility, while a lower Bandwidth suggests lower volatility. It can be used to identify periods of consolidation (low Bandwidth) that may precede a breakout, or periods of high volatility (high Bandwidth) that may be unsustainable.">i</span> -->
+                    <div class="info-content hidden">
+                    </div>
+                    </div>
+                    <div class="control-row">
+                    <input type="checkbox" id="showBBW"> <label for="showBBW">Show</label>
+                    </div>
+                    <legend>%B</legend>
+                    <div class="info-box-container">
+                    <!-- <span class="info-icon" title="%B: %B (Percent B) is derived from Bollinger Bands and indicates where the price is in relation to the Upper and Lower Bollinger Bands. It is calculated as (Price - Lower Band) / (Upper Band - Lower Band). A %B value of 1 means the price is at the upper band, 0 means it's at the lower band, and 0.5 means it's at the middle band. Values above 1 or below 0 indicate that the price is outside the bands, suggesting strong momentum or extreme price movements.">i</span> -->
+                    <div class="info-content hidden">
+                    </div>
+                    </div>
+                    <div class="control-row">
+                    <input type="checkbox" id="showPercentB"> <label for="showPercentB">Show</label>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>RSI</legend>
+                    <div class="control-row">
+                        <input type="checkbox" id="showRsi" > <label for="showRsi">Show</label>
+                    </div>
+                    <div class="control-row">
+                        <label for="rsiPeriod">Period:</label> <input type="number" id="rsiPeriod" value="14" min="2">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>MACD</legend>
+                    <div class="control-row">
+                        <input type="checkbox" id="showMacd" > <label for="showMacd">Show</label>
+                    </div>
+                    <div class="control-row">
+                        <label for="macdFast">Fast:</label> <input type="number" id="macdFast" value="12" min="2">
+                    </div>
+                    <div class="control-row">
+                        <label for="macdSlow">Slow:</label> <input type="number" id="macdSlow" value="26" min="2">
+                    </div>
+                    <div class="control-row">
+                        <label for="macdSignal">Signal:</label> <input type="number" id="macdSignal" value="9" min="2">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>OBV</legend>
+                    <div class="control-row">
+                        <input type="checkbox" id="showObv"> <label for="showObv">Show</label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>A/D Line</legend>
+                    <div class="control-row">
+                        <input type="checkbox" id="showAdLine"> <label for="showAdLine">Show</label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>ADX</legend>
+                    <div class="control-row">
+                        <input type="checkbox" id="showAdx"> <label for="showAdx">Show</label>
+                    </div>
+                    <div class="control-row">
+                        <label for="adxPeriod">Period:</label> <input type="number" id="adxPeriod" value="14" min="2">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Stochastic Oscillator</legend>
+                    <div class="control-row">
+                        <input type="checkbox" id="showStochastic"> <label for="showStochastic">Show</label>
+                    </div>
+                    <div class="control-row">
+                        <label for="stochasticKPeriod">K Period:</label> <input type="number" id="stochasticKPeriod" value="14" min="1">
+                    </div>
+                    <div class="control-row">
+                        <label for="stochasticDPeriod">D Period:</label> <input type="number" id="stochasticDPeriod" value="3" min="1">
+                    </div>
+                    <div class="control-row">
+                        <label for="stochasticSmoothing">Smoothing:</label> <input type="number" id="stochasticSmoothing" value="3" min="1">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Signals</legend>
+                    <div class="control-row">
+                        <input type="checkbox" id="showRsiSignals" > <label for="showRsiSignals">RSI Signals</label>
+                    </div>
+                    <div class="control-row">
+                        <input type="checkbox" id="showMacdSignals" > <label for="showMacdSignals">MACD Signals</label>
+                    </div>
+                    <div class="control-row">
+                        <input type="checkbox" id="showStochasticSignals" > <label for="showStochasticSignals">Stochastic Signals</label>
+                    </div>
+                </fieldset>
+
+                <button id="apply-settings">Apply Changes</button>
+
+                <fieldset>
+                    <legend>Drawing Tools</legend>
+                    <div class="control-row">
+                        <input type="checkbox" id="drawMode"> <label for="drawMode">Draw Mode</label>
+                    </div>
+                    <div class="control-row">
+                        <input type="checkbox" id="tooltipMode" checked> <label for="tooltipMode">Show Tooltip</label>
+                    </div>
+                </fieldset>
+
+                </div>
+            </div>
+            <div id="backtest-controls" class="visible hidden">
+                <fieldset>
+                    <legend>Backtest Settings</legend>
+                    <div class="control-row">
+                    <label for="strategy-select">Strategy:</label>
+                    <select id="strategy-select">
+                        <option value="rsi">RSI Crossover</option>
+                        <option value="macd">MACD Crossover</option>
+                    </select>
+                    </div>
+
+                    <div id="strategy-params">
+                    <div id="rsi-params" class="strategy-param-group">
+                        <div class="control-row">
+                        <label for="backtestRsiPeriod">RSI Period:</label>
+                        <input type="number" id="backtestRsiPeriod" value="14" min="2">
+                        </div>
+                    </div>
+
+                    <div id="macd-params" class="strategy-param-group hidden">
+                        <div class="control-row">
+                        <label for="backtestMacdFast">MACD Fast Period:</label>
+                        <input type="number" id="backtestMacdFast" value="12" min="2">
+                        </div>
+                        <div class="control-row">
+                        <label for="backtestMacdSlow">MACD Slow Period:</label>
+                        <input type="number" id="backtestMacdSlow" value="26" min="2">
+                        </div>
+                        <div class="control-row">
+                        <label for="backtestMacdSignal">MACD Signal Period:</label>
+                        <input type="number" id="backtestMacdSignal" value="9" min="2">
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="control-row">
+                    <label for="initial-cash">Initial Cash:</label>
+                    <input type="number" id="initial-cash" value="10000" min="100">
+                    </div>
+
+                    <div class="control-row">
+                    <button id="run-backtest">Run Backtest</button>
+                    </div>
+                </fieldset>
+
+                <div id="backtest-results" class="card">
+                    <h2>Backtest Results</h2>
+                    <p>Total Profit: <span id="total-profit">-</span></p>
+                    <p>Total Trades: <span id="total-trades">-</span></p>
+                    <p>Winning Trades: <span id="winning-trades">-</span></p>
+                    <p>Losing Trades: <span id="losing-trades">-</span></p>
+                    <p>Win Rate: <span id="win-rate">-</span></p>
+                    <p>Avg Profit/Trade: <span id="avg-profit-trade">-</span></p>
+                    <p>Avg Loss/Trade: <span id="avg-loss-trade">-</span></p>
+                    <p>Max Drawdown: <span id="max-drawdown">-</span></p>
+                </div>
+            </div>
+
+            <div id="chart-container"></div>
+            <div id="tooltip" class="hidden"></div>
+        </div>
+
+        <div x-show="data.activeTab === 'ai_performance'" class="mt-6">
+            <!-- 성과 요약 카드 (3칸으로 변경) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <!-- 1. 정확도 -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <p class="text-gray-400 text-xs uppercase">AI 예측 정확도</p>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-3xl font-bold" 
+                            :class="predictions.accuracy >= 50 ? 'text-green-400' : 'text-red-400'"
+                            x-text="predictions.accuracy + '%'"></span>
+                    </div>
+                </div>
+
+                <!-- 2. 누적 수익률 [추가된 부분] -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <p class="text-gray-400 text-xs uppercase">모델 매매 수익률</p>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <!-- 수익이면 빨강/초록(설정에따라), 손실이면 파랑 -->
+                        <span class="text-3xl font-bold"
+                            :class="predictions.model_return > 0 ? 'text-red-400' : 'text-blue-400'"
+                            x-text="(predictions.model_return > 0 ? '+' : '') + predictions.model_return + '%'">
+                        </span>
+                        <span class="text-xs text-gray-500">(복리 적용)</span>
+                    </div>
+                </div>
+
+                <!-- 3. 총 예측 횟수 -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <p class="text-gray-400 text-xs uppercase">총 예측 횟수</p>
+                    <p class="text-3xl font-bold text-white mt-2" x-text="predictions.total_count + '회'"></p>
+                </div>
+            </div>
+
+            <!-- 상세 예측 이력 테이블 -->
+            <div class="overflow-x-auto rounded-lg border border-gray-700">
+                <table class="w-full text-sm text-left text-gray-400">
+                    <thead class="text-xs uppercase bg-gray-700 text-gray-300">
+                        <tr>
+                            <th class="px-4 py-3">날짜</th>
+                            <th class="px-4 py-3">AI 시그널</th>
+                            <th class="px-4 py-3">실제 결과</th>
+                            <th class="px-4 py-3">변동률</th> <!-- [수정] -->
+                            <th class="px-4 py-3 text-center">성공</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="log in predictions.logs" :key="log.date">
+                            <tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+                                <td class="px-4 py-3 font-medium text-white" x-text="log.date"></td>
+                                <td class="px-4 py-3">
+                                    <span :class="log.signal.includes('매수') ? 'text-red-400' : (log.signal.includes('관망') ? 'text-gray-400' : 'text-blue-400')" 
+                                        x-text="log.signal"></span>
+                                </td>
+                                <td class="px-4 py-3" x-text="log.outcome"></td>
+                                
+                                <!-- 변동률 (View에서 이미 소수점 2자리로 round 처리해서 보냄) -->
+                                <td class="px-4 py-3 font-bold">
+                                    <span :class="log.change > 0 ? 'text-red-400' : 'text-blue-400'" 
+                                        x-text="(log.change > 0 ? '+' : '') + log.change + '%'"></span>
+                                </td>
+                                
+                                <td class="px-4 py-3 text-center">
+                                    <span x-show="log.is_correct" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
+                                        적중
+                                    </span>
+                                    <span x-show="!log.is_correct" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-gray-400">
+                                        실패
+                                    </span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Django -> JS 데이터 주입을 위한 스크립트 태그 -->
+<script id="initial-data" type="application/json">
+{{ initial_data_json|safe }}
+</script>
+{% endblock %}
+
+
+{% block scripts %}
+<!-- 라이브러리 로드 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<!-- 데이터 파싱 및 컴포넌트 로직 파일 로드 -->
+<script>
+    const initialData = JSON.parse(document.getElementById('initial-data').textContent || '{}');
+</script>
+<script src="{% static 'js/stockDetail.js' %}"></script>
+<script src="{% static 'js/bundle.js' %}"></script>
+{% endblock %}

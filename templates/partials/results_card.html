@@ -1,0 +1,54 @@
+{% load humanize sorting_tags %} 
+<div class="results-card">
+    <div class="card-header">
+        <h5 class="card-title">검색 결과</h5>
+        <span class="results-count">
+            총 {{ page_obj.paginator.count|intcomma }} 건
+        </span>
+    </div>
+    <div class="table-responsive">
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th scope="col">{% sortable_header 'short_name' '종목명' %}</th>
+                    <th scope="col" class="text-end">{% sortable_header 'current_price' '현재가' %}</th>
+                    <th scope="col" class="text-end">{% sortable_header 'market_change' 'change' %}</th>
+                    <th scope="col" class="text-end">{% sortable_header 'change_percent' 'change(%)' %}</th>
+                    <th scope="col" class="text-end">{% sortable_header 'market_cap' '시가총액' %}</th>
+                    <th scope="col" class="text-end">{% sortable_header 'trailing_pe' 'PER' %}</th>
+                    <th scope="col" class="text-end">{% sortable_header 'price_to_book' 'PBR' %}</th>
+                    <th scope="col" class="text-end">{% sortable_header 'trailing_eps' 'EPS' %}</th>
+                    <th scope="col" class="text-end">{% sortable_header 'dividend_yield' '배당수익률(%)' %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in page_obj %}
+                <tr>
+                    <td>
+                        <a href="{% url 'stock_detail' stock.code %}">{{ stock.short_name }}</a>
+                        <span class="ticker-code">{{ stock.code }}</span>
+                    </td>
+                    <td class="text-end {% if stock.market_change > 0 %}text-green-500{% else %}text-red-500{% endif %}">${{ stock.current_price|floatformat:2|intcomma }}</td>
+                    <td class="text-end {% if stock.market_change > 0 %}text-green-500{% else %}text-red-500{% endif %}">${{ stock.market_change|floatformat:2|intcomma }}</td>
+                    <td class="text-end {% if stock.market_change > 0 %}text-green-500{% else %}text-red-500{% endif %}">{{ stock.change_percent|floatformat:2|intcomma }}%</td>
+                    <td class="text-end">${{ stock.market_cap|humanize_kr_simple }}</td>
+                    <td class="text-end">{{ stock.trailing_pe|floatformat:2 }}</td>
+                    <td class="text-end">{{ stock.price_to_book|floatformat:2 }}</td>
+                    <td class="text-end">{{ stock.trailing_eps|floatformat:2 }}</td>
+                    <td class="text-end">{{ stock.dividend_yield|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="6">
+                        <p>조건에 맞는 종목이 없습니다.</p>
+                        <small>다른 조건으로 검색해 보세요.</small>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id="pagination-wrapper">
+        {% include 'partials/pagination.html' %} {# 이건 재사용 #}
+    </div>
+</div>

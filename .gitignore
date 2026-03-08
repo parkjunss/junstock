@@ -12,9 +12,14 @@ wheels/
 
 # Environment variables
 .env
+.dockerignore
 
 # Database
 db.sqlite3
+postgres_data
+core_data.json
+core_data2.json
+ai_data.json
 
 # Secrets
 fcm-service-account-key.json
@@ -51,3 +56,4 @@ package-lock.json
 
 # Miscellaneous
 backtest_sac.py
+

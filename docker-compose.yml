@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:15
+    container_name: stock_db
+    restart: always
+    environment:
+      POSTGRES_DB: stock_app_db
+      POSTGRES_USER: jun
+      POSTGRES_PASSWORD: qkrwns716722!
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: stock_redis
+    restart: always
+
+  web:
+    build: .
+    container_name: stock_web
+    # 기존 서비스 파일의 설정을 도커식으로 변환
+    command: gunicorn --access-logfile - --workers 1 --threads 4 --bind 0.0.0.0:8000 config.wsgi:application
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://jun:your_password@db:5432/stock_app_db
+    depends_on:
+      - db
+      - redis
+
+  celery_default:
+    build: .
+    container_name: celery_default
+    command: celery -A config worker -l info -n default@%h
+    depends_on:
+      - redis
+      - db
+
+  celery_pytorch:
+    build: .
+    container_name: celery_pytorch
+    command: celery -A config worker -l info -Q pytorch_queue -n pytorch@%h
+    depends_on:
+      - redis
+      - db
+
+  celery_beat:
+    build: .
+    container_name: celery_beat
+    command: celery -A config beat -l info
+    depends_on:
+      - redis
+      - db

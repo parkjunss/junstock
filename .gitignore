@@ -17,8 +17,8 @@ wheels/
 # Database
 db.sqlite3
 postgres_data
-core_data.json
-core_data2.json
+# core_data.json
+# core_data2.json
 ai_data.json
 
 # Secrets

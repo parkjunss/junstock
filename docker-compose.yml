@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: stock_app_db
       POSTGRES_USER: jun
-      POSTGRES_PASSWORD: 
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -27,7 +27,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgres://jun:your_password@db:5432/stock_app_db
+      - DATABASE_URL=${DATABASE_URL}
     depends_on:
       - db
       - redis

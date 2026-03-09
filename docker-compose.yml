@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: stock_app_db
       POSTGRES_USER: jun
-      POSTGRES_PASSWORD: qkrwns716722!
+      POSTGRES_PASSWORD: 
     ports:
       - "5432:5432"
     volumes:

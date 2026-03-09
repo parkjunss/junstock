@@ -68,7 +68,6 @@ INSTALLED_APPS = [
 
     'stocks.apps.StocksConfig', # 또는 간단히 'stocks'라고 적어도 됩니다.
     'core',
-    'movies',
     'users',
     
 ]

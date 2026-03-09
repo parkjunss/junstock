@@ -14,13 +14,11 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('api/', include([
         path('stocks/', include('stocks.urls')),
-        path('movies/', include('movies.urls')),
         path('auth/', include('dj_rest_auth.urls')),
         path('auth/registration/', include('dj_rest_auth.registration.urls')),
     ])),
     path('password-reset/', include('django.contrib.auth.urls')),
     path('', include('core.urls')),
-    path('movies/', include(('movies.urls', 'movies_web'), namespace='movies_web')),
     path('robots.txt', TemplateView.as_view(
         template_name='robots.txt',
         content_type='text/plain'

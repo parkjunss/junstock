@@ -75,7 +75,6 @@ YFINANCE_TO_MODEL_MAP = {
     'fiftyTwoWeekLow': 'fifty_two_week_low',
 }
 
-
 def is_market_open_on(target_date):
     """
     특정 날짜(target_date)에 시장이 열렸었는지 확인합니다.
@@ -113,7 +112,6 @@ def run_calculate_industry_averages_task():
         logger.info("===== 산업 평균 계산 작업 완료 =====")
     except Exception as e:
         logger.error(f"산업 평균 계산 중 오류 발생: {e}")
-
 
 @shared_task(rate_limit='1/m') # 1분에 1번만 실행되도록 rate limit 설정 (API 남용 방지)
 def sync_all_stocks_data():
@@ -179,7 +177,6 @@ def sync_all_stocks_data():
     logger.info("===== 전체 주식 데이터 동기화 종료 =====")
     return f"Synced {len(updated_stocks)} of {len(stock_codes)} stocks."
 
-
 # --- Real-time Data Caching Tasks ---
 @shared_task
 def task_fetch_and_cache_stock_detail(stock_code):
@@ -229,7 +226,6 @@ def task_fetch_and_cache_stock_chart(stock_code, period):
         logger.info(f"Cached stock chart for {stock_code} ({period})")
         
     return f"Successfully fetched and cached chart for {stock_code} ({period})"
-
 
 # --- 1. 개별 데이터 Fetching "일꾼" 태스크들 ---
 # services.py의 함수를 단순히 감싸는 역할만 합니다.
@@ -314,7 +310,6 @@ def update_dashboard_task():
     
     return "Dashboard update workflow has been successfully triggered."
 
-
 @shared_task
 def check_stock_prices_and_notify():
     """
@@ -389,7 +384,6 @@ def check_stock_prices_and_notify():
 
     logger.info("===== 주가 확인 작업 종료 =====")
 
-
 @shared_task
 def run_update_stock_metrics():
     """
@@ -402,11 +396,6 @@ def run_update_stock_metrics():
     except Exception as e:
         logger.info(f"주식 지표 업데이트 작업 중 오류 발생: {e}")
 
-
-# ==================================================================================
-# ↓↓↓ 아래는 Celery가 직접 실행하는 '@shared_task' 들입니다. ↓↓↓
-# ==================================================================================
-
 @shared_task
 def generate_daily_market_report_task():
     """TASK: 오늘의 종합 시황 리포트를 생성하고 DB에 저장"""
@@ -417,7 +406,6 @@ def generate_daily_market_report_task():
     summary_text = generate_market_summary_llm()
     DailyMarketReport.objects.create(date=today, summary_text=summary_text)
     print(f"Successfully created market report for {today}.")
-
 
 @shared_task
 def generate_analysis_for_stock_task(stock_id):
@@ -431,8 +419,6 @@ def generate_analysis_for_stock_task(stock_id):
     analysis_text = generate_single_stock_analysis_llm_v2(stock)
     StockDailyAnalysis.objects.create(stock=stock, date=today, analysis_text=analysis_text)
     print(f"Successfully created analysis for {stock.code} on {today}.")
-
-
 
 @shared_task
 def send_single_user_report_task(user_id, image_paths_dict):
@@ -601,7 +587,6 @@ def schedule_all_daily_reports():
     
     print(f">>> Chord queued with {len(header_tasks)} tasks in header.")
 
-
 @shared_task
 def update_stock_history_daily_task():
     """
@@ -632,8 +617,6 @@ def calculate_indicators_for_watchlist_stocks_task():
     else:
         print("No watchlist stocks to calculate indicators for.")
 
-
-
 @shared_task
 def calculate_single_stock_indicators_task(stock_id):
     """TASK: '단일' 주식의 기술적 지표를 계산합니다."""
@@ -660,7 +643,6 @@ def calculate_single_stock_indicators_task(stock_id):
         print(f"Stock with id {stock_id} does not exist. Skipping.")
     except Exception as e:
         print(f"Error calculating indicators for stock_id {stock_id}: {e}")
-
 
 @shared_task
 def evaluate_predictions():
@@ -744,7 +726,6 @@ def evaluate_predictions():
             print(f"Error evaluating prediction for {log.stock.code}: {e}")
 
     print("Prediction evaluation finished.")
-
 
 @shared_task(queue='pytorch-tasks')
 def run_daily_predictions():

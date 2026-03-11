@@ -357,7 +357,7 @@ def check_stock_prices_and_notify():
                     devices = FCMDevice.objects.filter(user=user, active=True)
                     
                     # 알림 본문 생성
-                    body = f"{stock.name}({stock.code})의 주가가 목표가({target_price})를 돌파했습니다! 현재가: {current_price:.2f}"
+                    body = f"{stock.short_name}({stock.code})의 주가가 목표가({target_price})를 돌파했습니다! 현재가: {current_price:.2f}"
                     
                     # 각 기기로 알림 발송
                     for device in devices:
@@ -366,7 +366,7 @@ def check_stock_prices_and_notify():
                             body=body,
                             data={"stock_code": stock.code, "current_price": f"{current_price:.2f}"}
                         )
-                    logger.info(f"알림 발송 완료: {user.username} - {stock.name}")
+                    logger.info(f"알림 발송 완료: {user.username} - {stock.code}")
                     
                     # 중복 발송 방지를 위해 목표가 초기화
                     item.target_price = None

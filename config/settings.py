@@ -33,7 +33,9 @@ DB_PASSWORD = config('DB_PASSWORD')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['junstock.duckdns.org', 'www.junstock.duckdns.org', 'localhost', '127.0.0.1']
+
+ALLOWED_HOSTS = ['junstock.duckdns.org', 'www.junstock.duckdns.org', 'localhost', '127.0.0.1', '192.168.0.174']
+
 if DEBUG:
     ALLOWED_HOSTS = ['*']
 
@@ -306,34 +308,34 @@ LOGIN_REDIRECT_URL = '/'
 CELERY_BEAT_SCHEDULE = {
     # 1. 매일 아침 주식 데이터 동기화 (미국장 마감 후 오전 8시)
     'sync-stocks-every-morning': {
-        'task': 'apps.stocks.tasks.sync_all_stocks_data', # 실제 경로에 맞춰 수정
+        'task': 'stocks.tasks.sync_all_stocks_data', # 실제 경로에 맞춰 수정
         'schedule': crontab(hour=8, minute=0),
     },
     # 2. 대시보드 데이터 업데이트 (5분마다)
     'update-dashboard-5min': {
-        'task': 'apps.stocks.tasks.update_dashboard_task',
+        'task': 'stocks.tasks.update_dashboard_task',
         'schedule': crontab(minute='*/5'),
     },
     # 3. AI 주가 예측 실행 (데이터 동기화 후 오전 8시 30분)
     # pytorch_queue를 사용하도록 설정된 경우 자동으로 해당 워커가 가져감
     'run-ai-predictions-daily': {
-        'task': 'apps.stocks.tasks.run_daily_predictions',
+        'task': 'stocks.tasks.run_daily_predictions',
         'schedule': crontab(hour=8, minute=30),
         'options': {'queue': 'pytorch_queue'} 
     },
     # 4. 일일 리포트 생성 및 이메일 발송 (오전 9시)
     'send-daily-reports': {
-        'task': 'apps.stocks.tasks.schedule_all_daily_reports',
+        'task': 'stocks.tasks.schedule_all_daily_reports',
         'schedule': crontab(hour=9, minute=0),
     },
     # 5. 목표가 도달 알림 체크 (장중 1분마다)
     'check-target-prices': {
-        'task': 'apps.stocks.tasks.check_stock_prices_and_notify',
+        'task': 'stocks.tasks.check_stock_prices_and_notify',
         'schedule': crontab(minute='*'),
     },
     # 6. 예측 결과 평가 (새벽 2시)
     'evaluate-ai-performance': {
-        'task': 'apps.stocks.tasks.evaluate_predictions',
+        'task': 'stocks.tasks.evaluate_predictions',
         'schedule': crontab(hour=2, minute=0),
     },
 }
